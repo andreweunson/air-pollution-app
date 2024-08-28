@@ -1,10 +1,10 @@
 
 import './App.css'
-import DataContainer from './assets/components/APData';
+import AirQuality from './assets/components/AirQuality';
 
 function App() {
   return (
-    <div><DataContainer /></div>
+    <div><AirQuality /></div>
   )
 }
 
