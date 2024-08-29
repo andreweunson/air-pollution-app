@@ -1,32 +1,26 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import AirQuality from "./assets/components/AirQuality";
+import { getAirQuality } from "./services/air-pollution";
 
 function App() {
   const [airData, setAirData] = useState({ sensor: { "pm2.5": 0 } });
-  const [airQuality, setAirQuality] = useState(-1);
-  const myRequest = new Request(
-    "https://api.purpleair.com/v1/sensors/175509?fields=name%2Cpm2.5",
-    {
-      headers: {
-        "X-API-Key": "your api key here",
-      },
-    }
-  );
+  const [refresh, setRefresh] = useState(false);
+
+  // Refreshes the data every 5 minutes
+  setInterval(() => {
+    setRefresh(!refresh);
+  }, 30000);
 
   useEffect(() => {
-    if (airData.sensor["pm2.5"] !== 0) {
-      return;
-    }
-    fetch(myRequest)
-      .then((response) => response.json())
-      .then((airData) => setAirData(airData));
-  }, [airData, myRequest, setAirData]);
+    getAirQuality(175509, "name%2Cpm2.5", "YOUR_API_KEY")
+      .then((response: Response) => response.json())
+      .then((airData: any) => setAirData(airData));
+  }, [refresh]);
 
-  setAirQuality(airData.sensor["pm2.5"]);
   return (
     <div>
-      <AirQuality />
+      <AirQuality airData={airData} />
     </div>
   );
 }
