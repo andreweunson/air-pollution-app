@@ -13,7 +13,7 @@ function App() {
   }, 30000);
 
   useEffect(() => {
-    getAirQuality(175509, "name%2Cpm2.5", "YOUR_API_KEY")
+    getAirQuality(175509, "name,pm2.5")
       .then((response: Response) => response.json())
       .then((airData: any) => setAirData(airData));
   }, [refresh]);

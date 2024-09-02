@@ -1,11 +1,15 @@
-const basePath = "https://api.purpleair.com/v1/sensors";
+const basePath = "/api";
 
-export function getAirQuality(sensorId: number, fields: string, apiKey: string): Promise<Response> {
-  return fetch(`${basePath}/${sensorId}?fields=${fields}`, {
+export function getAirQuality(
+  sensorId: number,
+  fields: string
+): Promise<Response> {
+  return fetch(`${basePath}`, {
     headers: {
-      "X-API-Key": `${apiKey}`,
+      sensorId: sensorId.toString(),
+      fields: fields.toString(),
     },
-  })
+  });
 }
 
 export function encodeURL(url: string): string {
