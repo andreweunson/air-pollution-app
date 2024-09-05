@@ -4,15 +4,17 @@ require("dotenv").config();
 const PORT = 3000;
 
 app.get("/api", async (req, res) => {
-  let sensorId = req.get("sensorId");
-  let encodedFields = encodeURIComponent(req.get("fields"));
-  console.log(`sensorId: ${sensorId}\nfields: ${encodedFields}`);
-  if (!sensorId || !encodedFields) {
-    sensorId = "175509";
-    encodedFields = "name%2Cpm2.5_24hour";
-  }
-  console.log(`sensorId: ${sensorId}\nfields: ${encodedFields}`);
+  // Set options for what data we want to fetch, if not parsable then use the default
+  let sensorId = req.get("sensorId") || process.env.DEFAULT_SENSOR_ID;
+  let options = req.get("fields") || process.env.DEFAULT_SENSOR_FIELDS;
+  let encodedFields = encodeURIComponent(options);
 
+  // Debug log
+  console.log(
+    `Fetching data with headers of:\nsensorId: ${sensorId},\nfields: ${encodedFields}\n`
+  );
+
+  // Fetch the data from the PurpleAir API
   fetch(
     `https://api.purpleair.com/v1/sensors/${sensorId}?fields=${encodedFields}`,
     {
@@ -23,7 +25,18 @@ app.get("/api", async (req, res) => {
   )
     .then((response) => {
       response.json().then((data) => {
-        res.send(data);
+        // Instead of displaying the data with something like a res.send(data) we can instead make our
+        // own json and send that so I can guarantee the body is always the same
+        fetchedData = {
+          name: data.sensor.name,
+          time_read: data.time_stamp,
+          sensorData: {
+            sensor_index: data.sensor.sensor_index,
+            "pm2.5": data.sensor.stats["pm2.5"],
+            "pm2.5_24hr": data.sensor.stats["pm2.5_24hour"],
+          },
+        };
+        res.send(fetchedData);
       });
     })
     .catch((error) => console.error(error));
