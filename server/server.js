@@ -7,6 +7,11 @@ app.get("/api", async (req, res) => {
   let sensorId = req.get("sensorId");
   let encodedFields = encodeURIComponent(req.get("fields"));
   console.log(`sensorId: ${sensorId}\nfields: ${encodedFields}`);
+  if (!sensorId || !encodedFields) {
+    sensorId = "175509";
+    encodedFields = "name%2Cpm2.5_24hour";
+  }
+  console.log(`sensorId: ${sensorId}\nfields: ${encodedFields}`);
 
   fetch(
     `https://api.purpleair.com/v1/sensors/${sensorId}?fields=${encodedFields}`,

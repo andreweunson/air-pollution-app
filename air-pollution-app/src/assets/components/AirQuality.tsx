@@ -3,9 +3,23 @@ interface Props {
 }
 
 function AirQuality({ airData }: Props) {
-  let value = airData.sensor["pm2.5"];
+  const MILLISECONDS = 1000;
+  let pm2_5 = airData.sensor["stats"]["pm2.5_24hour"];
+  let name = airData.sensor["name"];
+  let timeStamp = airData["time_stamp"] * MILLISECONDS;
 
-  return <div>{value ? <h1>{value}</h1> : <h1>Air Quality</h1>}</div>;
+  console.log(pm2_5);
+
+  let queriedTime = new Date(timeStamp).toLocaleTimeString();
+
+  return (
+    <>
+      <h1>Air Quality</h1>
+      <p>PM2.5: {pm2_5}</p>
+      <p>Location: {name}</p>
+      <p>Time: {queriedTime}</p>
+    </>
+  );
 }
 
 export default AirQuality;
