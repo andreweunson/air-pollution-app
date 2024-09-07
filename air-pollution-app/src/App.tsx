@@ -19,7 +19,7 @@ function App() {
   // Refreshes the data every 5 minutes
   setInterval(() => {
     setRefresh(!refresh);
-  }, 300000);
+  }, 5 * 60 * 1000);
 
   useEffect(() => {
     getAirQuality(sensorIdRequested, fieldsRequested)

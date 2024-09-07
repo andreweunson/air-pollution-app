@@ -1,17 +1,31 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
-const PORT = 3000;
+
+let cachedData = {};
+let lastFetchTime = 0;
 
 app.get("/api", async (req, res) => {
-  // Set options for what data we want to fetch, if not parsable then use the default
+  // If the last fetch time is within refresh threshold then return the data we already have
+  let currentTime = Date.now();
+  console.log(`\nCurrent time: ${currentTime}`);
+  console.log(`Last fetch time: ${lastFetchTime}`);
+  console.log(`Time elapsed: ${currentTime - lastFetchTime}`);
+
+  // If cache is not stale, return cached data
+  if (currentTime - lastFetchTime < process.env.REFRESH_INTERVAL) {
+    console.log("Cache is fresh, returning cached data");
+    res.send(cachedData);
+    return;
+  }
+  console.log("Cache is stale, fetching new data");
+
+  // Set options for what data we want to fetch. If not parsable, use the default
   let sensorId = req.get("sensorId") || process.env.DEFAULT_SENSOR_ID;
   let options = req.get("fields") || process.env.DEFAULT_SENSOR_FIELDS;
   let encodedFields = encodeURIComponent(options);
-
-  // Debug log
   console.log(
-    `Fetching data with headers of:\nsensorId: ${sensorId},\nfields: ${encodedFields}\n`
+    `Fetching data with headers of:\n\tsensorId: ${sensorId},\n\tfields: ${encodedFields}`
   );
 
   // Fetch the data from the PurpleAir API
@@ -25,8 +39,7 @@ app.get("/api", async (req, res) => {
   )
     .then((response) => {
       response.json().then((data) => {
-        // Instead of displaying the data with something like a res.send(data) we can instead make our
-        // own json and send that so I can guarantee the body is always the same
+        // Returning custom JSON object with relevant data
         fetchedData = {
           name: data.sensor.name,
           time_read: data.time_stamp,
@@ -36,12 +49,14 @@ app.get("/api", async (req, res) => {
             "pm2.5_24hr": data.sensor.stats["pm2.5_24hour"],
           },
         };
+        lastFetchTime = Date.now(); // Update the last fetch time
+        cachedData = fetchedData; // Cache the fetched data since cache is stale
         res.send(fetchedData);
       });
     })
     .catch((error) => console.error(error));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(process.env.DEFAULT_PORT, () => {
+  console.log(`Server is running on port ${process.env.DEFAULT_PORT}`);
 });
