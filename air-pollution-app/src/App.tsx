@@ -5,16 +5,20 @@ import { getAirQuality } from "./services/air-pollution";
 
 function App() {
   const [airData, setAirData] = useState({
-    name: "",
-    time_read: 0,
-    sensorData: {
-      "pm2.5": -1,
-      "pm2.5_24hour": -1,
+    api_version: "",
+    time_stamp: 0,
+    data_time_stamp: 0,
+    sensor: {
+      sensor_index: 0,
+      name: "",
+      "pm2.5": 0,
+      stats: { "pm2.5": 0, "pm2.5_24hour": 0, time_stamp: 0 },
     },
   });
+
   const [refresh, setRefresh] = useState(false);
-  const sensorIdRequested = 175509;
-  const fieldsRequested = "name,pm2.5_24hour";
+  const SENSOR_ID = 175509;
+  const FIELDS = "name,pm2.5_24hour";
 
   // Refreshes the data every 5 minutes
   setInterval(() => {
@@ -22,7 +26,7 @@ function App() {
   }, 5 * 60 * 1000);
 
   useEffect(() => {
-    getAirQuality(sensorIdRequested, fieldsRequested)
+    getAirQuality(SENSOR_ID, FIELDS)
       .then((response: Response) => response.json())
       .then((airData: any) => setAirData(airData));
   }, [refresh]);
